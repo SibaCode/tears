@@ -118,7 +118,41 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-
+{/* Quick Actions */}
+<div className="card">
+  <div className="card-header">
+    <h2>Quick Actions</h2>
+  </div>
+  <div className="card-body">
+    <div style={{display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)'}}>
+      <Link 
+        to="/admin/cases?new=true"
+        className="btn btn-primary"
+        style={{textAlign: 'center'}}
+      >
+        + Create New Case
+      </Link>
+      
+      {userRole === 'admin' && (
+        <Link 
+          to="/admin/users"
+          className="btn btn-secondary"
+          style={{textAlign: 'center'}}
+        >
+          👥 Manage Users
+        </Link>
+      )}
+      
+      <Link 
+        to="/get-help"
+        className="btn btn-success"
+        style={{textAlign: 'center'}}
+      >
+        🌐 View Public Site
+      </Link>
+    </div>
+  </div>
+</div>
       {/* Help Requests Alert */}
       {userRole === 'admin' && stats.newHelpRequests > 0 && (
         <div className="alert alert-warning" style={{marginBottom: 'var(--spacing-6)'}}>

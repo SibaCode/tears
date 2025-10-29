@@ -1,19 +1,16 @@
-// In src/components/admin/Register.js - Update the form to conditionally show specializations
+// src/components/admin/EditCounsellor.js
 import React, { useState } from 'react';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
-import { auth, db } from '../../firebase/config';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '../../firebase/config';
 
-const Register = ({ onSuccess, onCancel }) => {
+const EditCounsellor = ({ user, onSuccess, onCancel }) => {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    role: 'counsellor', // Default to counsellor
-    specialization: [], // Only for counsellors
-    maxCases: 15, // Only for counsellors
-    isActive: true
+    name: user.name || '',
+    email: user.email || '',
+    role: user.role || 'counsellor',
+    specialization: user.specialization || [],
+    maxCases: user.maxCases || 15,
+    isActive: user.isActive !== undefined ? user.isActive : true
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -35,76 +32,34 @@ const Register = ({ onSuccess, onCancel }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    
-    // Validation
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-    
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
-      return;
-    }
-
     setLoading(true);
 
     try {
-      // Create user in Firebase Authentication
-      const userCredential = await createUserWithEmailAndPassword(
-        auth, 
-        formData.email, 
-        formData.password
-      );
-      
-      const user = userCredential.user;
-
-      // Prepare user data for Firestore
-      const userData = {
+      // Prepare update data
+      const updateData = {
         name: formData.name,
         email: formData.email,
         role: formData.role,
-        isActive: true,
-        createdAt: new Date(),
-        createdBy: auth.currentUser.uid
+        isActive: formData.isActive,
+        updatedAt: new Date()
       };
 
       // Only add specialization and maxCases for counsellors
       if (formData.role === 'counsellor') {
-        userData.specialization = formData.specialization;
-        userData.maxCases = formData.maxCases;
+        updateData.specialization = formData.specialization;
+        updateData.maxCases = formData.maxCases;
+      } else {
+        // Remove specialization and maxCases if changing from counsellor to admin
+        updateData.specialization = [];
+        updateData.maxCases = null;
       }
 
-      // Create user document in Firestore
-      await setDoc(doc(db, 'users', user.uid), userData);
-
-      // Reset form
-      setFormData({
-        name: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-        role: 'counsellor',
-        specialization: [],
-        maxCases: 15,
-        isActive: true
-      });
-
-      if (onSuccess) {
-        onSuccess();
-      }
+      await updateDoc(doc(db, 'users', user.id), updateData);
+      onSuccess();
 
     } catch (error) {
-      console.error('Registration error:', error);
-      if (error.code === 'auth/email-already-in-use') {
-        setError('Email address is already in use.');
-      } else if (error.code === 'auth/invalid-email') {
-        setError('Invalid email address.');
-      } else if (error.code === 'auth/weak-password') {
-        setError('Password is too weak.');
-      } else {
-        setError('Failed to create user. Please try again.');
-      }
+      console.error('Error updating user:', error);
+      setError('Failed to update user. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -120,6 +75,11 @@ const Register = ({ onSuccess, onCancel }) => {
           ? [...prev.specialization, value]
           : prev.specialization.filter(s => s !== value)
       }));
+    } else if (type === 'checkbox') {
+      setFormData({
+        ...formData,
+        [name]: checked
+      });
     } else {
       setFormData({
         ...formData,
@@ -131,7 +91,7 @@ const Register = ({ onSuccess, onCancel }) => {
   return (
     <div className="card">
       <div className="card-header">
-        <h3>Register New Staff Member</h3>
+        <h3>Edit User: {user.name}</h3>
       </div>
       <div className="card-body">
         <form onSubmit={handleSubmit} style={{display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)'}}>
@@ -242,32 +202,16 @@ const Register = ({ onSuccess, onCancel }) => {
             </div>
           )}
 
-          <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-4)'}}>
-            <div className="form-group">
-              <label className="form-label">Password *</label>
+          <div className="form-group">
+            <label style={{display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)'}}>
               <input
-                type="password"
-                name="password"
-                className="form-input"
-                value={formData.password}
+                type="checkbox"
+                name="isActive"
+                checked={formData.isActive}
                 onChange={handleChange}
-                required
-                minLength="6"
               />
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Confirm Password *</label>
-              <input
-                type="password"
-                name="confirmPassword"
-                className="form-input"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-                minLength="6"
-              />
-            </div>
+              Active User
+            </label>
           </div>
 
           <div style={{display: 'flex', gap: 'var(--spacing-4)', justifyContent: 'flex-end', marginTop: 'var(--spacing-4)'}}>
@@ -284,7 +228,7 @@ const Register = ({ onSuccess, onCancel }) => {
               className="btn btn-primary"
               disabled={loading}
             >
-              {loading ? 'Creating User...' : 'Create User'}
+              {loading ? 'Updating...' : 'Update User'}
             </button>
           </div>
         </form>
@@ -293,4 +237,4 @@ const Register = ({ onSuccess, onCancel }) => {
   );
 };
 
-export default Register;
+export default EditCounsellor;

@@ -21,9 +21,11 @@ import Register from './pages/admin/Register';
 import Login from './pages/admin/Login';
 import Dashboard from './pages/admin/Dashboard';
 import Users from './pages/admin/Users';
+import Cases from './pages/admin/Cases';
 
 // Admin Components
 import AdminSidebar from './components/admin/AdminSidebar';
+import SuperAdminSetup from './pages/admin/SuperAdminSetup';
 
 const PublicLayout = ({ children }) => (
   <div style={{display: 'flex', flexDirection: 'column', minHeight: '100vh'}}>
@@ -63,12 +65,20 @@ const AdminRoute = ({ children }) => {
   return <AdminLayout>{children}</AdminLayout>;
 };
 
+// Create a separate component for the role-based dashboard
+const DashboardRouter = () => {
+  const { userRole } = useAuth();
+  return <Dashboard userRole={userRole} />;
+};
+
 function App() {
   return (
     <AuthProvider>
       <Router>
         <Routes>
           {/* Public Routes */}
+          <Route path="/admin/super-setup" element={<SuperAdminSetup />} />
+
           <Route path="/" element={
             <PublicLayout>
               <Home />
@@ -106,7 +116,12 @@ function App() {
           <Route path="/admin/login" element={<Login />} />
           <Route path="/admin/dashboard" element={
             <AdminRoute>
-              <Dashboard />
+              <DashboardRouter />
+            </AdminRoute>
+          } />
+          <Route path="/admin/cases" element={
+            <AdminRoute>
+              <Cases />
             </AdminRoute>
           } />
           <Route path="/admin/users" element={

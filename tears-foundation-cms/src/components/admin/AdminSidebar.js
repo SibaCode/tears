@@ -61,6 +61,24 @@ const AdminSidebar = () => {
             </Link>
           </li>
           
+          <li>
+            <Link 
+              to="/admin/cases" 
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                padding: 'var(--spacing-3) var(--spacing-4)',
+                color: 'var(--white)',
+                textDecoration: 'none',
+                borderRadius: 'var(--radius-lg)',
+                backgroundColor: isActive('/admin/cases') ? 'rgba(255,255,255,0.2)' : 'transparent',
+                transition: 'background-color 0.2s'
+              }}
+            >
+              📋 Case Management
+            </Link>
+          </li>
+          
           {userRole === 'admin' && (
             <li>
               <Link 

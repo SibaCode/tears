@@ -128,14 +128,14 @@ const Login = () => {
               Contact administrator for login credentials
             </p>
           </div>
-          <div style={{textAlign: 'center', marginTop: 'var(--spacing-4)'}}>
-            <p style={{fontSize: 'var(--font-size-sm)', color: 'var(--secondary-gray)'}}>
-              Need to create the first admin account?{' '}
-              <Link to="/admin/register" style={{color: 'var(--primary-blue)', fontWeight: '500', textDecoration: 'none'}}>
-                Register here
-              </Link>
-            </p>
-          </div>
+        <div style={{textAlign: 'center', marginTop: 'var(--spacing-4)'}}>
+          <p style={{fontSize: 'var(--font-size-sm)', color: 'var(--secondary-gray)'}}>
+            Having trouble registering?{' '}
+            <Link to="/admin/manual-setup" style={{color: 'var(--primary-blue)', fontWeight: '500', textDecoration: 'none'}}>
+              Use manual setup
+            </Link>
+          </p>
+        </div>
         </div>
       </div>
     </div>
