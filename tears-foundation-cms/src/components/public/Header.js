@@ -21,6 +21,12 @@ const Header = () => {
             <Link to="/admin/login" className="btn btn-primary">
               Staff Login
             </Link>
+             <Link to="/admin/register" className="btn btn-secondary" style={{marginLeft: 'var(--spacing-2)'}}>
+              Register
+            </Link> 
+            <Link to="/admin" className="btn btn-primary">
+              Staff Portal
+            </Link>
           </nav>
         </div>
       </div>
