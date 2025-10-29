@@ -1,0 +1,31 @@
+// src/components/public/Header.js
+import React from 'react';
+import { Link } from 'react-router-dom';
+
+const Header = () => {
+  return (
+    <header className="navbar">
+      <div className="container">
+        <div className="navbar-content">
+          <Link to="/" className="navbar-brand">
+            TEARS Foundation
+          </Link>
+          
+          <nav className="navbar-nav" style={{display: 'flex', gap: 'var(--spacing-6)', alignItems: 'center'}}>
+            <Link to="/" className="nav-link">Home</Link>
+            <Link to="/about" className="nav-link">About</Link>
+            <Link to="/services" className="nav-link">Services</Link>
+            <Link to="/get-help" className="nav-link">Get Help</Link>
+            <Link to="/volunteer" className="nav-link">Volunteer</Link>
+            <Link to="/contact" className="nav-link">Contact</Link>
+            <Link to="/admin/login" className="btn btn-primary">
+              Staff Login
+            </Link>
+          </nav>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default Header;
