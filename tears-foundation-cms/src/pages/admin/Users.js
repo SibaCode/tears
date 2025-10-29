@@ -1,10 +1,10 @@
 // src/pages/admin/Users.js
 import React, { useState, useEffect } from 'react';
-import { collection, onSnapshot, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, onSnapshot, doc, updateDoc, deleteDoc , getDocs} from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { useAuth } from '../../context/AuthContext';
-import Register from '../admin/Register';
-import EditCounsellor from '../admin/EditCounsellor';
+import Register from '../admin/Register'; // Fixed import path
+import EditCounsellor from '../admin/EditCounsellor'; // Fixed import path
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -14,17 +14,23 @@ const Users = () => {
   const [filter, setFilter] = useState('all');
   const { userRole } = useAuth();
 
-  useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, 'users'), (snapshot) => {
+// In src/pages/admin/Users.js - Replace the useEffect with:
+useEffect(() => {
+  const loadUsers = async () => {
+    try {
+      const snapshot = await getDocs(collection(db, 'users'));
       const usersData = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
       setUsers(usersData);
-    });
+    } catch (error) {
+      console.error('Error loading users:', error);
+    }
+  };
 
-    return unsubscribe;
-  }, []);
+  loadUsers();
+}, []);
 
   const handleToggleActive = async (userId, currentStatus) => {
     try {
@@ -74,19 +80,20 @@ const Users = () => {
     return true;
   });
 
-  // Only allow admins to access this page
-//   if (userRole !== 'admin') {
+  // Only allow admins to access this page - FIXED VERSION
+  if (userRole !== 'admin') {
     return (
       <div style={{padding: 'var(--spacing-8) 0'}}>
         <div className="container">
           <div className="alert alert-error">
             <h3>Access Denied</h3>
             <p>You do not have permission to access this page.</p>
+            <p>Your role: {userRole || 'Not logged in'}</p>
           </div>
         </div>
       </div>
     );
-//   }
+  }
 
   return (
     <div style={{padding: 'var(--spacing-8) 0'}}>

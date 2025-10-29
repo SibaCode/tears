@@ -1,7 +1,7 @@
 // src/App.js
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { AuthProvider } from './context/AuthContext';
 
 // Public Components
 import Header from './components/public/Header';
@@ -19,13 +19,16 @@ import Contact from './pages/public/Contact';
 import Welcome from './pages/admin/Welcome';
 import Register from './pages/admin/Register';
 import Login from './pages/admin/Login';
-import Dashboard from './pages/admin/Dashboard';
 import Users from './pages/admin/Users';
 import Cases from './pages/admin/Cases';
+import Reports from './pages/admin/Reports';
 
-// Admin Components
-import AdminSidebar from './components/admin/AdminSidebar';
-import SuperAdminSetup from './pages/admin/SuperAdminSetup';
+// Route Components
+import AdminRoute from './components/routes/AdminRoute';
+import CounsellorRoute from './components/routes/CounsellorRoute';
+import StaffRoute from './components/routes/StaffRoute';
+import DashboardRouter from './components/routes/DashboardRouter';
+import PublicCaseTracker from './pages/PublicCaseTracker';
 
 const PublicLayout = ({ children }) => (
   <div style={{display: 'flex', flexDirection: 'column', minHeight: '100vh'}}>
@@ -37,98 +40,34 @@ const PublicLayout = ({ children }) => (
   </div>
 );
 
-const AdminLayout = ({ children }) => (
-  <div style={{display: 'flex'}}>
-    <AdminSidebar />
-    <div style={{
-      marginLeft: '250px',
-      flex: 1,
-      minHeight: '100vh',
-      backgroundColor: 'var(--secondary-gray-light)'
-    }}>
-      {children}
-    </div>
-  </div>
-);
-
-const AdminRoute = ({ children }) => {
-  const { currentUser, userRole } = useAuth();
-  
-  if (!currentUser) {
-    return <Navigate to="/admin/login" />;
-  }
-  
-  if (userRole !== 'admin' && userRole !== 'counsellor') {
-    return <Navigate to="/" />;
-  }
-  
-  return <AdminLayout>{children}</AdminLayout>;
-};
-
-// Create a separate component for the role-based dashboard
-const DashboardRouter = () => {
-  const { userRole } = useAuth();
-  return <Dashboard userRole={userRole} />;
-};
-
 function App() {
   return (
     <AuthProvider>
       <Router>
         <Routes>
           {/* Public Routes */}
-          <Route path="/admin/super-setup" element={<SuperAdminSetup />} />
+          <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
+          <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
+          <Route path="/services" element={<PublicLayout><Services /></PublicLayout>} />
+          <Route path="/get-help" element={<PublicLayout><GetHelp /></PublicLayout>} />
+          <Route path="/volunteer" element={<PublicLayout><Volunteer /></PublicLayout>} />
+          <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
+<Route path="/track-case" element={<PublicCaseTracker />} />
 
-          <Route path="/" element={
-            <PublicLayout>
-              <Home />
-            </PublicLayout>
-          } />
-          <Route path="/about" element={
-            <PublicLayout>
-              <About />
-            </PublicLayout>
-          } />
-          <Route path="/services" element={
-            <PublicLayout>
-              <Services />
-            </PublicLayout>
-          } />
-          <Route path="/get-help" element={
-            <PublicLayout>
-              <GetHelp />
-            </PublicLayout>
-          } />
-          <Route path="/volunteer" element={
-            <PublicLayout>
-              <Volunteer />
-            </PublicLayout>
-          } />
-          <Route path="/contact" element={
-            <PublicLayout>
-              <Contact />
-            </PublicLayout>
-          } />
-
-          {/* Admin Routes */}
+          {/* Auth Routes */}
           <Route path="/admin/welcome" element={<Welcome />} />
           <Route path="/admin/register" element={<Register />} />
           <Route path="/admin/login" element={<Login />} />
-          <Route path="/admin/dashboard" element={
-            <AdminRoute>
-              <DashboardRouter />
-            </AdminRoute>
-          } />
-          <Route path="/admin/cases" element={
-            <AdminRoute>
-              <Cases />
-            </AdminRoute>
-          } />
-          <Route path="/admin/users" element={
-            <AdminRoute>
-              <Users />
-            </AdminRoute>
-          } />
+
+          {/* Staff Routes */}
+          <Route path="/admin/dashboard" element={<StaffRoute><DashboardRouter /></StaffRoute>} />
+
+          {/* Admin-Only Routes */}
+          <Route path="/admin/users" element={<AdminRoute><Users /></AdminRoute>} />
+          <Route path="/admin/reports" element={<AdminRoute><Reports /></AdminRoute>} />
+
+          {/* Cases - All staff can access */}
+          <Route path="/admin/cases" element={<StaffRoute><Cases /></StaffRoute>} />
 
           {/* Redirects */}
           <Route path="/admin" element={<Navigate to="/admin/welcome" />} />

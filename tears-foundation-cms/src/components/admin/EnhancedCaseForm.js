@@ -11,7 +11,6 @@ const EnhancedCaseForm = ({ caseData, onSave, onCancel }) => {
     contactInfo: '',
     caseTopic: 'general',
     caseDescription: '',
-    status: 'new',
     urgency: 'medium',
     assignedCounsellorId: '',
     ...caseData
@@ -20,6 +19,7 @@ const EnhancedCaseForm = ({ caseData, onSave, onCancel }) => {
   const [counsellors, setCounsellors] = useState([]);
   const [loading, setLoading] = useState(false);
   const [filteredCounsellors, setFilteredCounsellors] = useState([]);
+  const [inHouseCounsellors, setInHouseCounsellors] = useState([]);
   
   // Move useAuth to the top level of the component
   const { userRole, currentUser } = useAuth();
@@ -41,7 +41,7 @@ const EnhancedCaseForm = ({ caseData, onSave, onCancel }) => {
   // Load available counsellors
   useEffect(() => {
     const loadCounsellors = async () => {
-      if (userRole === 'admin') {
+      if (userRole === 'admin' || userRole === 'superadmin') {
         try {
           const counsellorsQuery = query(
             collection(db, 'users'),
@@ -54,7 +54,18 @@ const EnhancedCaseForm = ({ caseData, onSave, onCancel }) => {
             ...doc.data()
           }));
           setCounsellors(counsellorsData);
-          setFilteredCounsellors(counsellorsData);
+          
+          // Find in-house counsellors (those without specific specializations or with general specialization)
+          const inHouse = counsellorsData.filter(counsellor => {
+            const specializations = Array.isArray(counsellor.specialization) 
+              ? counsellor.specialization 
+              : (counsellor.specialization ? [counsellor.specialization] : []);
+            
+            return specializations.length === 0 || 
+                   specializations.includes('general') ||
+                   specializations.some(spec => spec.toLowerCase().includes('general'));
+          });
+          setInHouseCounsellors(inHouse);
         } catch (error) {
           console.error('Error loading counsellors:', error);
         }
@@ -77,9 +88,15 @@ const EnhancedCaseForm = ({ caseData, onSave, onCancel }) => {
         return specializations.includes(formData.caseTopic) || 
                specializations.some(spec => spec.toLowerCase().includes(formData.caseTopic));
       });
-      setFilteredCounsellors(matchedCounsellors);
+      
+      // If no matching counsellors found, use in-house counsellors
+      if (matchedCounsellors.length === 0) {
+        setFilteredCounsellors(inHouseCounsellors);
+      } else {
+        setFilteredCounsellors(matchedCounsellors);
+      }
     }
-  }, [formData.caseTopic, counsellors]);
+  }, [formData.caseTopic, counsellors, inHouseCounsellors]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -88,15 +105,16 @@ const EnhancedCaseForm = ({ caseData, onSave, onCancel }) => {
     try {
       const caseDataToSave = {
         ...formData,
+        status: 'new', // Automatically set status to 'new'
         updatedAt: new Date(),
-        updatedBy: currentUser.uid // Use currentUser from the top level
+        updatedBy: currentUser.uid
       };
 
       if (caseData?.id) {
         await updateDoc(doc(db, 'cases', caseData.id), caseDataToSave);
       } else {
         caseDataToSave.createdAt = new Date();
-        caseDataToSave.createdBy = currentUser.uid; // Use currentUser from the top level
+        caseDataToSave.createdBy = currentUser.uid;
         caseDataToSave.caseId = `CASE-${Date.now()}`;
         
         await addDoc(collection(db, 'cases'), caseDataToSave);
@@ -129,6 +147,11 @@ const EnhancedCaseForm = ({ caseData, onSave, onCancel }) => {
     const topic = caseTopics.find(t => t.value === specialization);
     return topic ? topic.label : (specialization || 'General');
   };
+
+  // Check if we're using in-house counsellors as fallback
+  const isUsingInHouseCounsellors = formData.caseTopic !== 'general' && 
+    filteredCounsellors.length > 0 && 
+    filteredCounsellors.every(counsellor => inHouseCounsellors.some(ih => ih.id === counsellor.id));
 
   return (
     <div className="card">
@@ -213,10 +236,16 @@ const EnhancedCaseForm = ({ caseData, onSave, onCancel }) => {
           </div>
 
           {/* Counsellor Assignment Section */}
-          {userRole === 'admin' && (
+          {(userRole === 'admin' || userRole === 'superadmin') && (
             <div className="card" style={{backgroundColor: 'var(--primary-blue-light)'}}>
               <div className="card-body">
                 <h4 style={{marginBottom: 'var(--spacing-4)'}}>Assign Counsellor</h4>
+                
+                {isUsingInHouseCounsellors && (
+                  <div className="alert alert-info" style={{marginBottom: 'var(--spacing-4)'}}>
+                    <strong>Note:</strong> No specialized counsellors found for this topic. Showing in-house general counsellors instead.
+                  </div>
+                )}
                 
                 <div className="form-group">
                   <label className="form-label">
@@ -237,13 +266,13 @@ const EnhancedCaseForm = ({ caseData, onSave, onCancel }) => {
                       {filteredCounsellors.map(counsellor => (
                         <option key={counsellor.id} value={counsellor.id}>
                           {counsellor.name} - {formatSpecialization(counsellor.specialization)}
+                          {inHouseCounsellors.some(ih => ih.id === counsellor.id) && ' (In-House)'}
                         </option>
                       ))}
                     </select>
                   ) : (
                     <div className="alert alert-warning">
-                      No counsellors available for this topic. 
-                      {counsellors.length > 0 && ' You can still assign a general counsellor manually.'}
+                      No counsellors available at the moment. Please try again later or contact administration.
                     </div>
                   )}
                 </div>
@@ -251,7 +280,9 @@ const EnhancedCaseForm = ({ caseData, onSave, onCancel }) => {
                 {/* Counsellor List Preview */}
                 {filteredCounsellors.length > 0 && (
                   <div style={{marginTop: 'var(--spacing-4)'}}>
-                    <h5 style={{marginBottom: 'var(--spacing-2)'}}>Available Counsellors:</h5>
+                    <h5 style={{marginBottom: 'var(--spacing-2)'}}>
+                      Available Counsellors {isUsingInHouseCounsellors && '(In-House)'}:
+                    </h5>
                     <div style={{display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)', maxHeight: '200px', overflowY: 'auto'}}>
                       {filteredCounsellors.map(counsellor => (
                         <div 
@@ -266,7 +297,10 @@ const EnhancedCaseForm = ({ caseData, onSave, onCancel }) => {
                           }}
                           onClick={() => setFormData(prev => ({...prev, assignedCounsellorId: counsellor.id}))}
                         >
-                          <div style={{fontWeight: '600'}}>{counsellor.name}</div>
+                          <div style={{fontWeight: '600'}}>
+                            {counsellor.name}
+                            {inHouseCounsellors.some(ih => ih.id === counsellor.id) && ' (In-House)'}
+                          </div>
                           <div style={{fontSize: 'var(--font-size-sm)'}}>
                             Specialization: {formatSpecialization(counsellor.specialization)}
                           </div>
@@ -279,35 +313,19 @@ const EnhancedCaseForm = ({ caseData, onSave, onCancel }) => {
             </div>
           )}
 
-          {/* Case Status and Urgency */}
-          <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-4)'}}>
-            <div className="form-group">
-              <label className="form-label">Status</label>
-              <select
-                name="status"
-                className="form-select"
-                value={formData.status}
-                onChange={handleChange}
-              >
-                <option value="new">New</option>
-                <option value="inProgress">In Progress</option>
-                <option value="closed">Closed</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">Urgency Level</label>
-              <select
-                name="urgency"
-                className="form-select"
-                value={formData.urgency}
-                onChange={handleChange}
-              >
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-              </select>
-            </div>
+          {/* Urgency Level Only - Status Removed */}
+          <div className="form-group">
+            <label className="form-label">Urgency Level</label>
+            <select
+              name="urgency"
+              className="form-select"
+              value={formData.urgency}
+              onChange={handleChange}
+            >
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+            </select>
           </div>
 
           <div style={{display: 'flex', gap: 'var(--spacing-4)', justifyContent: 'flex-end', marginTop: 'var(--spacing-4)'}}>

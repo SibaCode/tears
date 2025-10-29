@@ -18,6 +18,24 @@ const Header = () => {
             <Link to="/get-help" className="nav-link">Get Help</Link>
             <Link to="/volunteer" className="nav-link">Volunteer</Link>
             <Link to="/contact" className="nav-link">Contact</Link>
+                    <li>
+              <Link 
+                to="/track-case" 
+                style={{
+                  color: 'white',
+                  textDecoration: 'none',
+                  fontWeight: '600',
+                  backgroundColor: 'rgba(255,255,255,0.2)',
+                  padding: 'var(--spacing-2) var(--spacing-4)',
+                  borderRadius: 'var(--radius)',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseOver={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.3)'}
+                onMouseOut={(e) => e.target.style.backgroundColor = 'rgba(255,255,255,0.2)'}
+              >
+                📋 Track Your Case
+              </Link>
+            </li>
             <Link to="/admin/login" className="btn btn-primary">
               Staff Login
             </Link>

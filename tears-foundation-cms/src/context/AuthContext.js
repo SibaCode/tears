@@ -24,21 +24,22 @@ export const AuthProvider = ({ children }) => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const login = async (email, password) => {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    
-    // Get user data from Firestore
-    const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
-    if (userDoc.exists()) {
-      const userData = userDoc.data();
-      setUserRole(userData.role);
-      setUserData(userData);
-    } else {
-      throw new Error('User not authorized. Please contact administrator.');
-    }
-    
-    return userCredential;
-  };
+  // In src/context/AuthContext.js - Update the login function
+const login = async (email, password) => {
+  const userCredential = await signInWithEmailAndPassword(auth, email, password);
+  
+  // Get user data from Firestore
+  const userDoc = await getDoc(doc(db, 'users', userCredential.user.uid));
+  if (userDoc.exists()) {
+    const userData = userDoc.data();
+    setUserRole(userData.role);
+    setUserData(userData);
+  } else {
+    throw new Error('User not authorized. Please contact administrator.');
+  }
+  
+  return userCredential;
+};
 
   const logout = () => {
     setUserRole(null);

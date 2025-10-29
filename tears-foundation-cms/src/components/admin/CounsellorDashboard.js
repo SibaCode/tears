@@ -50,7 +50,7 @@ const CounsellorDashboard = () => {
   return (
     <div style={{padding: 'var(--spacing-6)'}}>
       <div style={{marginBottom: 'var(--spacing-6)'}}>
-        <h1>My Cases</h1>
+        <h1>My Casesw</h1>
         <p>Welcome back, {userData?.name}</p>
       </div>
 

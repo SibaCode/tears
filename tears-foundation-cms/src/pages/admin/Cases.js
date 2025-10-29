@@ -1,9 +1,7 @@
-// src/pages/admin/Cases.js
 import React, { useState, useEffect } from 'react';
-import { collection, query, where, onSnapshot, orderBy, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs, query, where, orderBy  , deleteDoc, doc} from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { useAuth } from '../../context/AuthContext';
-import CaseForm from './CaseForm';
 import EnhancedCaseForm from '../../components/admin/EnhancedCaseForm';
 
 const Cases = () => {
@@ -14,30 +12,37 @@ const Cases = () => {
   const { userRole, currentUser } = useAuth();
 
   useEffect(() => {
-    let casesQuery;
-    
-    if (userRole === 'counsellor') {
-      casesQuery = query(
-        collection(db, 'cases'),
-        where('assignedCounsellorId', '==', currentUser.uid),
-        orderBy('updatedAt', 'desc')
-      );
-    } else {
-      casesQuery = query(
-        collection(db, 'cases'),
-        orderBy('updatedAt', 'desc')
-      );
-    }
+    const loadCases = async () => {
+      try {
+        let casesQuery;
+        
+        if (userRole === 'counsellor') {
+          // Counsellors only see their assigned cases
+          casesQuery = query(
+            collection(db, 'cases'),
+            where('assignedCounsellorId', '==', currentUser.uid),
+            orderBy('updatedAt', 'desc')
+          );
+        } else {
+          // Admins and Super Admins see all cases
+          casesQuery = query(
+            collection(db, 'cases'),
+            orderBy('updatedAt', 'desc')
+          );
+        }
 
-    const unsubscribe = onSnapshot(casesQuery, (snapshot) => {
-      const casesData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setCases(casesData);
-    });
+        const snapshot = await getDocs(casesQuery);
+        const casesData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setCases(casesData);
+      } catch (error) {
+        console.error('Error loading cases:', error);
+      }
+    };
 
-    return unsubscribe;
+    loadCases();
   }, [userRole, currentUser]);
 
   const handleDeleteCase = async (caseId, caseName) => {
@@ -81,13 +86,22 @@ const Cases = () => {
   return (
     <div style={{padding: 'var(--spacing-6)'}}>
       <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-6)'}}>
-        <h1>Case Management</h1>
-        <button 
-          className="btn btn-primary"
-          onClick={() => setShowForm(true)}
-        >
-          + New Case
-        </button>
+        <h1>
+          {userRole === 'counsellor' ? 'My Cases' : 'Case Management1'}
+          <span style={{fontSize: 'var(--font-size-sm)', color: 'var(--secondary-gray)', marginLeft: 'var(--spacing-2)'}}>
+            ({cases.length} cases)
+          </span>
+        </h1>
+        
+        {/* Only show "New Case" button for admins */}
+        {(userRole === 'admin' || userRole === 'superadmin') && (
+          <button 
+            className="btn btn-primary"
+            onClick={() => setShowForm(true)}
+          >
+            + New Case
+          </button>
+        )}
       </div>
 
       {showForm || editingCase ? (

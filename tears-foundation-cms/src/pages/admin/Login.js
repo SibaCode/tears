@@ -126,6 +126,7 @@ const Login = () => {
             <p style={{fontSize: 'var(--font-size-sm)', textAlign: 'center', margin: 0}}>
               <strong>Demo Access:</strong><br/>
               Contact administrator for login credentials
+              Demo Access: superadmin@tears.org / SuperAdmin123!
             </p>
           </div>
         <div style={{textAlign: 'center', marginTop: 'var(--spacing-4)'}}>
