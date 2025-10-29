@@ -1,7 +1,7 @@
 // src/pages/PublicCaseTracker.js
 import React, { useState, useEffect } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
+import { useSearchParams } from 'react-router-dom';
+import { collection, query, where, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
 const PublicCaseTracker = () => {
@@ -20,8 +20,8 @@ const PublicCaseTracker = () => {
     }
   }, [searchParams]);
 
-  const fetchCase = async (id) => {
-    if (!id.trim()) {
+  const fetchCase = async (searchId) => {
+    if (!searchId.trim()) {
       setError('Please enter a case ID');
       return;
     }
@@ -31,25 +31,30 @@ const PublicCaseTracker = () => {
     setCaseData(null);
 
     try {
-      // Try to find case by public ID or regular ID
-      const caseDoc = await getDoc(doc(db, 'cases', id));
+      // Search for case by caseId field in the database
+      const casesQuery = query(
+        collection(db, 'cases'),
+        where('caseId', '==', searchId.toUpperCase())
+      );
       
-      if (caseDoc.exists()) {
+      const snapshot = await getDocs(casesQuery);
+      
+      if (!snapshot.empty) {
+        const caseDoc = snapshot.docs[0];
         const data = caseDoc.data();
         
         // Only show limited public information
         const publicData = {
           id: caseDoc.id,
-          caseId: data.caseId || caseDoc.id,
-          status: data.status,
+          caseId: data.caseId,
+          status: data.publicStatus || data.status, // Use publicStatus if available
           caseTopic: data.caseTopic,
           priority: data.priority,
           createdAt: data.createdAt?.toDate?.() || new Date(),
           updatedAt: data.updatedAt?.toDate?.() || new Date(),
           progress: data.progress || [],
           publicNotes: data.publicNotes || [],
-          // Don't include sensitive information like:
-          // personal details, contact info, internal notes, etc.
+          assignedCounsellor: data.assignedCounsellorId ? 'Assigned' : 'Not Assigned'
         };
         
         setCaseData(publicData);
@@ -58,7 +63,11 @@ const PublicCaseTracker = () => {
       }
     } catch (err) {
       console.error('Error fetching case:', err);
-      setError('Error fetching case details. Please try again.');
+      if (err.code === 'failed-precondition') {
+        setError('Search temporarily unavailable. Please try again later.');
+      } else {
+        setError('Error fetching case details. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -66,9 +75,11 @@ const PublicCaseTracker = () => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    if (caseId) {
-      setSearchParams({ caseId });
-      fetchCase(caseId);
+    if (caseId.trim()) {
+      setSearchParams({ caseId: caseId.trim() });
+      fetchCase(caseId.trim());
+    } else {
+      setError('Please enter a Case ID');
     }
   };
 
@@ -78,8 +89,21 @@ const PublicCaseTracker = () => {
       case 'inProgress': return '#f39c12';
       case 'closed': return '#27ae60';
       case 'resolved': return '#27ae60';
+      case 'Under Review': return '#e74c3c';
+      case 'In Progress': return '#f39c12';
+      case 'Resolved': return '#27ae60';
       default: return '#95a5a6';
     }
+  };
+
+  const getStatusText = (status) => {
+    const statusMap = {
+      'new': 'Under Review',
+      'inProgress': 'In Progress',
+      'closed': 'Resolved',
+      'resolved': 'Resolved'
+    };
+    return statusMap[status] || status;
   };
 
   const getPriorityColor = (priority) => {
@@ -89,6 +113,13 @@ const PublicCaseTracker = () => {
       case 'low': return '#27ae60';
       default: return '#95a5a6';
     }
+  };
+
+  const formatTopic = (topic) => {
+    if (!topic) return 'General';
+    return topic.split('_').map(word => 
+      word.charAt(0).toUpperCase() + word.slice(1)
+    ).join(' ');
   };
 
   return (
@@ -133,8 +164,8 @@ const PublicCaseTracker = () => {
                 <input
                   type="text"
                   value={caseId}
-                  onChange={(e) => setCaseId(e.target.value.toUpperCase())}
-                  placeholder="Enter your Case ID (e.g., TEARS-001)"
+                  onChange={(e) => setCaseId(e.target.value)}
+                  placeholder="Enter your Case ID (e.g., TEARS-123456)"
                   style={{
                     flex: 1,
                     padding: 'var(--spacing-3)',
@@ -153,7 +184,8 @@ const PublicCaseTracker = () => {
                     border: 'none',
                     borderRadius: 'var(--radius)',
                     cursor: 'pointer',
-                    fontWeight: '600'
+                    fontWeight: '600',
+                    minWidth: '100px'
                   }}
                 >
                   {loading ? 'Searching...' : 'Track'}
@@ -189,9 +221,9 @@ const PublicCaseTracker = () => {
                 padding: 'var(--spacing-4)',
                 borderBottom: '1px solid var(--border-gray)'
               }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--spacing-2)' }}>
                   <h3 style={{ margin: 0 }}>Case: {caseData.caseId}</h3>
-                  <div style={{ display: 'flex', gap: 'var(--spacing-3)' }}>
+                  <div style={{ display: 'flex', gap: 'var(--spacing-2)', flexWrap: 'wrap' }}>
                     <span style={{
                       padding: 'var(--spacing-1) var(--spacing-3)',
                       backgroundColor: getStatusColor(caseData.status),
@@ -201,7 +233,7 @@ const PublicCaseTracker = () => {
                       fontWeight: '600',
                       textTransform: 'capitalize'
                     }}>
-                      {caseData.status}
+                      {getStatusText(caseData.status)}
                     </span>
                     <span style={{
                       padding: 'var(--spacing-1) var(--spacing-3)',
@@ -217,7 +249,7 @@ const PublicCaseTracker = () => {
                   </div>
                 </div>
                 <p style={{ margin: 'var(--spacing-2) 0 0 0', color: 'var(--text-gray)' }}>
-                  Topic: {caseData.caseTopic || 'General'}
+                  Topic: {formatTopic(caseData.caseTopic)}
                 </p>
               </div>
 
@@ -259,7 +291,7 @@ const PublicCaseTracker = () => {
                       padding: 'var(--spacing-6)',
                       color: 'var(--text-light)'
                     }}>
-                      No progress updates available yet.
+                      No progress updates available yet. Check back later for updates.
                     </div>
                   )}
                 </div>
@@ -300,6 +332,10 @@ const PublicCaseTracker = () => {
                     <strong>Last Updated:</strong>
                     <p>{caseData.updatedAt.toLocaleDateString()}</p>
                   </div>
+                  <div>
+                    <strong>Counsellor:</strong>
+                    <p>{caseData.assignedCounsellor}</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -322,12 +358,12 @@ const PublicCaseTracker = () => {
                 <div style={{ padding: 'var(--spacing-4)' }}>
                   <div style={{ fontSize: '2rem', marginBottom: 'var(--spacing-2)' }}>1️⃣</div>
                   <h4>Get Your Case ID</h4>
-                  <p>You should have received a Case ID when your case was registered</p>
+                  <p>You should have received a Case ID (e.g., TEARS-123456) when your case was registered</p>
                 </div>
                 <div style={{ padding: 'var(--spacing-4)' }}>
                   <div style={{ fontSize: '2rem', marginBottom: 'var(--spacing-2)' }}>2️⃣</div>
                   <h4>Enter Case ID</h4>
-                  <p>Type your Case ID in the search box above</p>
+                  <p>Type your Case ID exactly as provided in the search box above</p>
                 </div>
                 <div style={{ padding: 'var(--spacing-4)' }}>
                   <div style={{ fontSize: '2rem', marginBottom: 'var(--spacing-2)' }}>3️⃣</div>

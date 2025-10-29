@@ -2,10 +2,11 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import tearsLogo from './logo.webp';
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('superadmin@tears.org');
+  const [password, setPassword] = useState('SuperAdmin123!');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
@@ -51,16 +52,26 @@ const Login = () => {
         <div className="card-body">
           <div style={{textAlign: 'center', marginBottom: 'var(--spacing-8)'}}>
             <div style={{
-              width: '64px',
-              height: '64px',
-              backgroundColor: 'var(--primary-blue)',
+              width: '80px',
+              height: '80px',
+              backgroundColor: 'var(--white)',
               borderRadius: '50%',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              margin: '0 auto var(--spacing-4)'
+              margin: '0 auto var(--spacing-4)',
+              border: '2px solid var(--primary-blue)',
+              padding: 'var(--spacing-2)'
             }}>
-              <span style={{fontSize: 'var(--font-size-2xl)', color: 'var(--white)'}}>💙</span>
+              <img 
+                src={tearsLogo} 
+                alt="TEARS Foundation Logo" 
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'contain'
+                }}
+              />
             </div>
             <h2 style={{marginBottom: 'var(--spacing-2)'}}>TEARS Foundation</h2>
             <p style={{color: 'var(--secondary-gray)'}}>Staff Login</p>
@@ -114,29 +125,48 @@ const Login = () => {
                 'Sign In'
               )}
             </button>
-            
-            <div style={{textAlign: 'center'}}>
-              <Link to="/" style={{color: 'var(--primary-blue)', fontWeight: '500', textDecoration: 'none'}}>
-                ← Back to main site
-              </Link>
-            </div>
           </form>
 
-          <div style={{marginTop: 'var(--spacing-6)', padding: 'var(--spacing-4)', backgroundColor: 'var(--primary-blue-light)', borderRadius: 'var(--radius-lg)'}}>
-            <p style={{fontSize: 'var(--font-size-sm)', textAlign: 'center', margin: 0}}>
-              <strong>Demo Access:</strong><br/>
-              Contact administrator for login credentials
-              Demo Access: superadmin@tears.org / SuperAdmin123!
+          {/* Disclaimer about pre-added test credentials */}
+          <div style={{
+            marginTop: 'var(--spacing-6)',
+            padding: 'var(--spacing-4)',
+            backgroundColor: '#fff3cd',
+            border: '1px solid #ffeaa7',
+            borderRadius: 'var(--radius-lg)'
+          }}>
+            <p style={{
+              fontSize: 'var(--font-size-sm)',
+              textAlign: 'center',
+              margin: 0,
+              color: '#856404',
+              lineHeight: '1.5'
+            }}>
+              <strong>🛡️ Demo System Notice</strong><br/>
+              Test credentials have been pre-configured for demonstration purposes.
+              Use the credentials below to explore the system:
             </p>
+            <div style={{
+              marginTop: 'var(--spacing-2)',
+              padding: 'var(--spacing-3)',
+              backgroundColor: 'rgba(255,255,255,0.5)',
+              borderRadius: 'var(--radius)',
+              fontSize: 'var(--font-size-xs)',
+              textAlign: 'center'
+            }}>
+              <strong>Email:</strong> superadmin@tears.org<br/>
+              <strong>Password:</strong> SuperAdmin123!
+            </div>
           </div>
-        <div style={{textAlign: 'center', marginTop: 'var(--spacing-4)'}}>
-          <p style={{fontSize: 'var(--font-size-sm)', color: 'var(--secondary-gray)'}}>
-            Having trouble registering?{' '}
-            <Link to="/admin/manual-setup" style={{color: 'var(--primary-blue)', fontWeight: '500', textDecoration: 'none'}}>
-              Use manual setup
-            </Link>
-          </p>
-        </div>
+
+          {/* <div style={{textAlign: 'center', marginTop: 'var(--spacing-4)'}}>
+            <p style={{fontSize: 'var(--font-size-sm)', color: 'var(--secondary-gray)'}}>
+              Having trouble accessing?{' '}
+              <Link to="/admin/manual-setup" style={{color: 'var(--primary-blue)', fontWeight: '500', textDecoration: 'none'}}>
+                Use manual setup
+              </Link>
+            </p>
+          </div> */}
         </div>
       </div>
     </div>

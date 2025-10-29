@@ -1,10 +1,10 @@
 // src/pages/admin/Users.js
 import React, { useState, useEffect } from 'react';
-import { collection, onSnapshot, doc, updateDoc, deleteDoc , getDocs} from 'firebase/firestore';
+import { collection, onSnapshot, doc, updateDoc, deleteDoc, getDocs } from 'firebase/firestore';
 import { db } from '../../firebase/config';
 import { useAuth } from '../../context/AuthContext';
-import Register from '../admin/Register'; // Fixed import path
-import EditCounsellor from '../admin/EditCounsellor'; // Fixed import path
+import Register from '../admin/Register';
+import EditCounsellor from '../admin/EditCounsellor';
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -14,23 +14,22 @@ const Users = () => {
   const [filter, setFilter] = useState('all');
   const { userRole } = useAuth();
 
-// In src/pages/admin/Users.js - Replace the useEffect with:
-useEffect(() => {
-  const loadUsers = async () => {
-    try {
-      const snapshot = await getDocs(collection(db, 'users'));
-      const usersData = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setUsers(usersData);
-    } catch (error) {
-      console.error('Error loading users:', error);
-    }
-  };
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const snapshot = await getDocs(collection(db, 'users'));
+        const usersData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setUsers(usersData);
+      } catch (error) {
+        console.error('Error loading users:', error);
+      }
+    };
 
-  loadUsers();
-}, []);
+    loadUsers();
+  }, []);
 
   const handleToggleActive = async (userId, currentStatus) => {
     try {
@@ -74,14 +73,15 @@ useEffect(() => {
   const filteredUsers = users.filter(user => {
     if (filter === 'all') return true;
     if (filter === 'counsellors') return user.role === 'counsellor';
-    if (filter === 'admins') return user.role === 'admin';
+    if (filter === 'admins') return user.role === 'admin' || user.role === 'superadmin';
+    if (filter === 'superadmins') return user.role === 'superadmin';
     if (filter === 'active') return user.isActive === true;
     if (filter === 'inactive') return user.isActive === false;
     return true;
   });
 
-  // Only allow admins to access this page - FIXED VERSION
-  if (userRole !== 'admin') {
+  // Allow both admin and superadmin to access this page
+  if (userRole !== 'admin' && userRole !== 'superadmin') {
     return (
       <div style={{padding: 'var(--spacing-8) 0'}}>
         <div className="container">
@@ -89,17 +89,33 @@ useEffect(() => {
             <h3>Access Denied</h3>
             <p>You do not have permission to access this page.</p>
             <p>Your role: {userRole || 'Not logged in'}</p>
+            <p>Required role: Admin or Super Admin</p>
           </div>
         </div>
       </div>
     );
   }
 
+  // Check if current user is superadmin for special permissions
+  const isSuperAdmin = userRole === 'superadmin';
+
   return (
     <div style={{padding: 'var(--spacing-8) 0'}}>
       <div className="container">
         <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-6)'}}>
-          <h1>User Management</h1>
+          <div>
+            <h1>User Management</h1>
+            {isSuperAdmin && (
+              <div style={{display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', marginTop: 'var(--spacing-2)'}}>
+                <span className="badge badge-high" style={{fontSize: 'var(--font-size-xs)'}}>
+                  Super Admin Mode
+                </span>
+                <span style={{fontSize: 'var(--font-size-sm)', color: 'var(--secondary-gray)'}}>
+                  Full system access
+                </span>
+              </div>
+            )}
+          </div>
           <button 
             className="btn btn-primary"
             onClick={() => setShowRegister(true)}
@@ -122,6 +138,7 @@ useEffect(() => {
                 <option value="all">All Users</option>
                 <option value="counsellors">Counsellors Only</option>
                 <option value="admins">Admins Only</option>
+                {isSuperAdmin && <option value="superadmins">Super Admins Only</option>}
                 <option value="active">Active Users</option>
                 <option value="inactive">Inactive Users</option>
               </select>
@@ -169,12 +186,21 @@ useEffect(() => {
                                 Max Cases: {user.maxCases}
                               </div>
                             )}
+                            {user.role === 'superadmin' && (
+                              <div style={{fontSize: 'var(--font-size-sm)', color: 'var(--primary-blue)'}}>
+                                Super Administrator
+                              </div>
+                            )}
                           </div>
                         </td>
                         <td className="table-cell">{user.email}</td>
                         <td className="table-cell">
-                          <span className={`badge ${user.role === 'admin' ? 'badge-high' : 'badge-medium'}`}>
+                          <span className={`badge ${
+                            user.role === 'superadmin' ? 'badge-high' : 
+                            user.role === 'admin' ? 'badge-medium' : 'badge-low'
+                          }`}>
                             {user.role}
+                            {user.role === 'superadmin' && ' ★'}
                           </span>
                         </td>
                         <td className="table-cell">
@@ -204,6 +230,8 @@ useEffect(() => {
                               className="btn btn-secondary"
                               style={{padding: 'var(--spacing-1) var(--spacing-2)', fontSize: 'var(--font-size-sm)'}}
                               onClick={() => setEditingUser(user)}
+                              // Prevent editing superadmin users unless you are superadmin
+                              disabled={user.role === 'superadmin' && !isSuperAdmin}
                             >
                               Edit
                             </button>
@@ -211,7 +239,7 @@ useEffect(() => {
                               className="btn btn-secondary"
                               style={{padding: 'var(--spacing-1) var(--spacing-2)', fontSize: 'var(--font-size-sm)'}}
                               onClick={() => handleToggleActive(user.id, user.isActive)}
-                              disabled={loading}
+                              disabled={loading || (user.role === 'superadmin' && !isSuperAdmin)}
                             >
                               {user.isActive ? 'Deactivate' : 'Activate'}
                             </button>
@@ -219,7 +247,7 @@ useEffect(() => {
                               className="btn btn-danger"
                               style={{padding: 'var(--spacing-1) var(--spacing-2)', fontSize: 'var(--font-size-sm)'}}
                               onClick={() => handleDeleteUser(user.id, user.email)}
-                              disabled={loading}
+                              disabled={loading || user.role === 'superadmin'}
                             >
                               Delete
                             </button>

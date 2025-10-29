@@ -1,6 +1,7 @@
 // src/pages/admin/Welcome.js
 import React from 'react';
 import { Link } from 'react-router-dom';
+import tearsLogo from './logo.webp';
 
 const Welcome = () => {
   return (
@@ -15,17 +16,28 @@ const Welcome = () => {
       textAlign: 'center'
     }}>
       <div style={{maxWidth: '500px'}}>
+        {/* Logo at the top */}
         <div style={{
-          width: '80px',
-          height: '80px',
+          width: '120px',
+          height: '120px',
           backgroundColor: 'var(--white)',
           borderRadius: '50%',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          margin: '0 auto var(--spacing-6)'
+          margin: '0 auto var(--spacing-6)',
+          padding: 'var(--spacing-3)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
         }}>
-          <span style={{fontSize: 'var(--font-size-3xl)', color: 'var(--primary-blue)'}}>💙</span>
+          <img 
+            src={tearsLogo} 
+            alt="TEARS Foundation Logo" 
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'contain'
+            }}
+          />
         </div>
         
         <h1 style={{fontSize: 'var(--font-size-4xl)', fontWeight: '700', marginBottom: 'var(--spacing-4)'}}>
@@ -33,44 +45,35 @@ const Welcome = () => {
         </h1>
         
         <p style={{fontSize: 'var(--font-size-xl)', marginBottom: 'var(--spacing-8)', opacity: 0.9}}>
-          Case Management System Setup
+          Case Management System
         </p>
         
         <div style={{display: 'flex', flexDirection: 'column', gap: 'var(--spacing-4)', alignItems: 'center'}}>
           <Link 
-            to="/admin/register" 
+            to="/admin/login" 
             className="btn btn-primary"
             style={{
               fontSize: 'var(--font-size-lg)',
               padding: 'var(--spacing-4) var(--spacing-8)',
               backgroundColor: 'var(--white)',
-              color: 'var(--primary-blue)'
+              color: 'var(--primary-blue)',
+              textDecoration: 'none',
+              borderRadius: 'var(--radius)',
+              fontWeight: '600',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = 'none';
             }}
           >
-            Create First Admin Account
+            Login
           </Link>
           
-          <Link 
-            to="/admin/login" 
-            style={{
-              color: 'var(--white)',
-              textDecoration: 'none',
-              fontWeight: '500'
-            }}
-          >
-            Already have an account? Sign in
-          </Link>
-        </div>
-        
-        <div style={{
-          marginTop: 'var(--spacing-8)',
-          padding: 'var(--spacing-4)',
-          backgroundColor: 'rgba(255,255,255,0.1)',
-          borderRadius: 'var(--radius-lg)'
-        }}>
-          <p style={{fontSize: 'var(--font-size-sm)', margin: 0}}>
-            <strong>First Time Setup:</strong> Create your administrator account to start managing cases and team members.
-          </p>
         </div>
       </div>
     </div>
