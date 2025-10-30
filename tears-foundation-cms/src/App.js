@@ -46,7 +46,7 @@ function App() {
       <Router>
         <Routes>
           {/* Public Routes */}
-          <Route path="/" element={<PublicLayout><Home /></PublicLayout>} />
+          {/* <Route path="/" element={<PublicLayout><Home /></PublicLayout>} /> */}
           <Route path="/about" element={<PublicLayout><About /></PublicLayout>} />
           <Route path="/services" element={<PublicLayout><Services /></PublicLayout>} />
           <Route path="/get-help" element={<PublicLayout><GetHelp /></PublicLayout>} />
@@ -57,7 +57,7 @@ function App() {
           {/* Auth Routes */}
           <Route path="/admin/welcome" element={<Welcome />} />
           <Route path="/admin/register" element={<Register />} />
-          <Route path="/admin/login" element={<Login />} />
+          <Route path="/" element={<Login />} />
 
           {/* Staff Routes */}
           <Route path="/admin/dashboard" element={<StaffRoute><DashboardRouter /></StaffRoute>} />
