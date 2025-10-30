@@ -141,52 +141,27 @@ const PublicCaseTracker = () => {
             marginBottom: 'var(--spacing-8)'
           }}>
             <div style={{
-              width: '80px',
-              height: '80px',
-              backgroundColor: 'var(--white)',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto var(--spacing-4)',
-              border: '2px solid var(--primary-blue)',
-              padding: 'var(--spacing-2)',
-              overflow: 'hidden'
-            }}>
-              {/* Logo - Choose one option below */}
-              
-              {/* Option 1: If you have a logo image */}
-              <img 
-                src={tearsLogo} 
-                alt="TEARS Foundation Logo" 
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'contain'
-                }}
-                onError={(e) => {
-                  // Fallback if logo fails to load
-                  e.target.style.display = 'none';
-                  e.target.nextSibling.style.display = 'flex';
-                }}
-              />
-              
-              {/* Option 2: Fallback text logo */}
-              <div style={{
-                display: tearsLogo ? 'none' : 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '100%',
-                height: '100%',
-                fontSize: 'var(--font-size-xl)',
-                fontWeight: 'bold',
-                color: 'var(--primary-blue)',
-                backgroundColor: 'var(--primary-blue-light)',
-                borderRadius: '50%'
-              }}>
-                TF
-              </div>
-            </div>
+                         width: '80px',
+                         height: '80px',
+                         backgroundColor: 'var(--white)',
+                         borderRadius: '50%',
+                         display: 'flex',
+                         alignItems: 'center',
+                         justifyContent: 'center',
+                         margin: '0 auto var(--spacing-4)',
+                         border: '2px solid var(--primary-blue)',
+                         padding: 'var(--spacing-2)'
+                       }}>
+                         <img 
+                           src={tearsLogo} 
+                           alt="TEARS Foundation Logo" 
+                           style={{
+                             width: '100%',
+                             height: '100%',
+                             objectFit: 'contain'
+                           }}
+                         />
+                       </div>
             <h1 style={{
               fontSize: 'var(--font-size-2xl)',
               fontWeight: '600',
