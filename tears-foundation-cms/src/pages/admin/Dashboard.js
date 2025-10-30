@@ -102,7 +102,7 @@ const Dashboard = () => {
           color: 'var(--text-gray)',
           fontSize: 'var(--font-size-lg)'
         }}>
-          Welcome back! Here's what's happening today.
+          Welcome back! Here's what's happening today.11
         </p>
       </div>
 

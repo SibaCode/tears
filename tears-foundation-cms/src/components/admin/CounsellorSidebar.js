@@ -115,7 +115,7 @@ const CounsellorSidebar = () => {
           🚪 Logout
         </button>
         
-        <Link 
+        {/* <Link 
           to="/" 
           style={{
             display: 'block',
@@ -130,7 +130,7 @@ const CounsellorSidebar = () => {
           onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
         >
           🌐 Public Site
-        </Link>
+        </Link> */}
       </div>
     </div>
   );

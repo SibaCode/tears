@@ -205,7 +205,7 @@ const AdminSidebar = ({ children }) => {
             🚪 Logout
           </button>
           
-          <Link 
+          {/* <Link 
             to="/" 
             style={{
               display: 'block',
@@ -220,7 +220,7 @@ const AdminSidebar = ({ children }) => {
             onMouseOut={(e) => e.target.style.backgroundColor = 'transparent'}
           >
             🌐 Public Site
-          </Link>
+          </Link> */}
         </div>
       </div>
 

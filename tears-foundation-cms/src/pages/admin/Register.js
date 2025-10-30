@@ -1,4 +1,4 @@
-// In src/components/admin/Register.js - Update the form to conditionally show specializations
+// In src/components/admin/Register.js
 import React, { useState } from 'react';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
@@ -78,18 +78,10 @@ const Register = ({ onSuccess, onCancel }) => {
       // Create user document in Firestore
       await setDoc(doc(db, 'users', user.uid), userData);
 
-      // Reset form
-      setFormData({
-        name: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-        role: 'counsellor',
-        specialization: [],
-        maxCases: 15,
-        isActive: true
-      });
+      // Show success message
+      alert('User created successfully!');
 
+      // Call onSuccess to close the form and refresh the parent component
       if (onSuccess) {
         onSuccess();
       }

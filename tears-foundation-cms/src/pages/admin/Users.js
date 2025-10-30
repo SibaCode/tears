@@ -59,11 +59,24 @@ const Users = () => {
     }
   };
 
-  const handleRegistrationSuccess = () => {
-    setShowRegister(false);
-    alert('User created successfully!');
+// In your Users.js component
+const handleRegistrationSuccess = () => {
+  setShowRegister(false);
+  // This will trigger the useEffect to reload users
+  const loadUsers = async () => {
+    try {
+      const snapshot = await getDocs(collection(db, 'users'));
+      const usersData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setUsers(usersData);
+    } catch (error) {
+      console.error('Error loading users:', error);
+    }
   };
-
+  loadUsers();
+};
   const handleEditSuccess = () => {
     setEditingUser(null);
     alert('User updated successfully!');
@@ -83,192 +96,442 @@ const Users = () => {
   // Allow both admin and superadmin to access this page
   if (userRole !== 'admin' && userRole !== 'superadmin') {
     return (
-      <div style={{padding: 'var(--spacing-8) 0'}}>
-        <div className="container">
-          <div className="alert alert-error">
-            <h3>Access Denied</h3>
-            <p>You do not have permission to access this page.</p>
-            <p>Your role: {userRole || 'Not logged in'}</p>
-            <p>Required role: Admin or Super Admin</p>
+      <div style={{padding: 'var(--spacing-8)'}}>
+        <div style={{
+          maxWidth: '480px',
+          margin: '0 auto',
+          textAlign: 'center',
+          padding: 'var(--spacing-12)'
+        }}>
+          <div style={{
+            width: '80px',
+            height: '80px',
+            backgroundColor: 'var(--secondary-gray-light)',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '0 auto var(--spacing-6)',
+            fontSize: 'var(--font-size-2xl)'
+          }}>
+            ⚠️
+          </div>
+          <h2 style={{
+            fontSize: 'var(--font-size-xl)',
+            fontWeight: '600',
+            color: 'var(--text-dark)',
+            marginBottom: 'var(--spacing-3)'
+          }}>
+            Access Restricted
+          </h2>
+          <p style={{
+            color: 'var(--text-gray)',
+            lineHeight: '1.6',
+            marginBottom: 'var(--spacing-4)'
+          }}>
+            You don't have the required permissions to access this section.
+          </p>
+          <div style={{
+            padding: 'var(--spacing-3)',
+            backgroundColor: 'var(--secondary-gray-light)',
+            borderRadius: 'var(--radius)',
+            fontSize: 'var(--font-size-sm)',
+            color: 'var(--text-gray)'
+          }}>
+            Current role: <strong>{userRole}</strong> • Required: <strong>Admin or Super Admin</strong>
           </div>
         </div>
       </div>
     );
   }
 
-  // Check if current user is superadmin for special permissions
   const isSuperAdmin = userRole === 'superadmin';
 
-  return (
-    <div style={{padding: 'var(--spacing-8) 0'}}>
-      <div className="container">
-        <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--spacing-6)'}}>
-          <div>
-            <h1>User Management</h1>
-            {isSuperAdmin && (
-              <div style={{display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)', marginTop: 'var(--spacing-2)'}}>
-                <span className="badge badge-high" style={{fontSize: 'var(--font-size-xs)'}}>
-                  Super Admin Mode
-                </span>
-                <span style={{fontSize: 'var(--font-size-sm)', color: 'var(--secondary-gray)'}}>
-                  Full system access
-                </span>
-              </div>
-            )}
-          </div>
-          <button 
-            className="btn btn-primary"
-            onClick={() => setShowRegister(true)}
-          >
-            + Add New User
-          </button>
-        </div>
+  const getRoleConfig = (role) => {
+    const config = {
+      superadmin: { color: '#d35400', bgColor: '#fef5e7', label: 'Super Admin' },
+      admin: { color: '#8e44ad', bgColor: '#f8f5ff', label: 'Admin' },
+      counsellor: { color: '#2980b9', bgColor: '#f0f8ff', label: 'Counsellor' },
+      user: { color: '#27ae60', bgColor: '#f0fff4', label: 'User' }
+    };
+    return config[role] || config.user;
+  };
 
-        {/* Filters */}
-        <div className="card" style={{marginBottom: 'var(--spacing-6)'}}>
-          <div className="card-body">
-            <div style={{display: 'flex', gap: 'var(--spacing-4)', alignItems: 'center', flexWrap: 'wrap'}}>
-              <span style={{fontWeight: '600'}}>Filter:</span>
-              <select 
-                className="form-select"
-                style={{width: 'auto'}}
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-              >
-                <option value="all">All Users</option>
-                <option value="counsellors">Counsellors Only</option>
-                <option value="admins">Admins Only</option>
-                {isSuperAdmin && <option value="superadmins">Super Admins Only</option>}
-                <option value="active">Active Users</option>
-                <option value="inactive">Inactive Users</option>
-              </select>
-              <span style={{color: 'var(--secondary-gray)'}}>
-                Showing {filteredUsers.length} of {users.length} users
-              </span>
-            </div>
-          </div>
-        </div>
-
+  if (showRegister || editingUser) {
+    return (
+      <div style={{padding: 'var(--spacing-6)'}}>
         {showRegister ? (
           <Register 
             onSuccess={handleRegistrationSuccess}
             onCancel={() => setShowRegister(false)}
           />
-        ) : editingUser ? (
+        ) : (
           <EditCounsellor 
             user={editingUser}
             onSuccess={handleEditSuccess}
             onCancel={() => setEditingUser(null)}
           />
-        ) : (
-          <div className="card">
-            <div className="card-body">
-              <div className="table-container">
-                <table className="table">
-                  <thead>
-                    <tr>
-                      <th className="table-header-cell">Name</th>
-                      <th className="table-header-cell">Email</th>
-                      <th className="table-header-cell">Role</th>
-                      <th className="table-header-cell">Specialization</th>
-                      <th className="table-header-cell">Status</th>
-                      <th className="table-header-cell">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredUsers.map((user) => (
-                      <tr key={user.id}>
-                        <td className="table-cell">
-                          <div>
-                            <strong>{user.name}</strong>
-                            {user.role === 'counsellor' && user.maxCases && (
-                              <div style={{fontSize: 'var(--font-size-sm)', color: 'var(--secondary-gray)'}}>
-                                Max Cases: {user.maxCases}
-                              </div>
-                            )}
-                            {user.role === 'superadmin' && (
-                              <div style={{fontSize: 'var(--font-size-sm)', color: 'var(--primary-blue)'}}>
-                                Super Administrator
-                              </div>
-                            )}
-                          </div>
-                        </td>
-                        <td className="table-cell">{user.email}</td>
-                        <td className="table-cell">
-                          <span className={`badge ${
-                            user.role === 'superadmin' ? 'badge-high' : 
-                            user.role === 'admin' ? 'badge-medium' : 'badge-low'
-                          }`}>
-                            {user.role}
-                            {user.role === 'superadmin' && ' ★'}
-                          </span>
-                        </td>
-                        <td className="table-cell">
-                          {user.role === 'counsellor' ? (
-                            user.specialization && user.specialization.length > 0 ? (
-                              <div style={{fontSize: 'var(--font-size-sm)'}}>
-                                {Array.isArray(user.specialization) 
-                                  ? user.specialization.join(', ') 
-                                  : user.specialization
-                                }
-                              </div>
-                            ) : (
-                              <span style={{color: 'var(--secondary-gray)', fontStyle: 'italic'}}>No specialization</span>
-                            )
-                          ) : (
-                            <span style={{color: 'var(--secondary-gray)'}}>-</span>
-                          )}
-                        </td>
-                        <td className="table-cell">
-                          <span className={`badge ${user.isActive ? 'badge-closed' : 'badge-in-progress'}`}>
-                            {user.isActive ? 'Active' : 'Inactive'}
-                          </span>
-                        </td>
-                        <td className="table-cell">
-                          <div style={{display: 'flex', gap: 'var(--spacing-2)'}}>
-                            <button
-                              className="btn btn-secondary"
-                              style={{padding: 'var(--spacing-1) var(--spacing-2)', fontSize: 'var(--font-size-sm)'}}
-                              onClick={() => setEditingUser(user)}
-                              // Prevent editing superadmin users unless you are superadmin
-                              disabled={user.role === 'superadmin' && !isSuperAdmin}
-                            >
-                              Edit
-                            </button>
-                            <button
-                              className="btn btn-secondary"
-                              style={{padding: 'var(--spacing-1) var(--spacing-2)', fontSize: 'var(--font-size-sm)'}}
-                              onClick={() => handleToggleActive(user.id, user.isActive)}
-                              disabled={loading || (user.role === 'superadmin' && !isSuperAdmin)}
-                            >
-                              {user.isActive ? 'Deactivate' : 'Activate'}
-                            </button>
-                            <button
-                              className="btn btn-danger"
-                              style={{padding: 'var(--spacing-1) var(--spacing-2)', fontSize: 'var(--font-size-sm)'}}
-                              onClick={() => handleDeleteUser(user.id, user.email)}
-                              disabled={loading || user.role === 'superadmin'}
-                            >
-                              Delete
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                    {filteredUsers.length === 0 && (
-                      <tr>
-                        <td colSpan="6" className="table-cell text-center">
-                          No users found
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
         )}
       </div>
+    );
+  }
+
+  return (
+    <div style={{padding: 'var(--spacing-6)'}}>
+      {/* Header */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        marginBottom: 'var(--spacing-8)'
+      }}>
+        <div>
+          <h1 style={{
+            fontSize: 'var(--font-size-2xl)',
+            fontWeight: '600',
+            color: 'var(--text-dark)',
+            marginBottom: 'var(--spacing-2)'
+          }}>
+            User Management
+          </h1>
+          <p style={{
+            color: 'var(--text-gray)',
+            fontSize: 'var(--font-size-base)',
+            margin: 0
+          }}>
+            Manage system users and their permissions
+          </p>
+        </div>
+        
+        <button 
+          style={{
+            padding: 'var(--spacing-3) var(--spacing-5)',
+            backgroundColor: 'var(--primary-blue)',
+            color: 'var(--white)',
+            border: 'none',
+            borderRadius: 'var(--radius)',
+            fontWeight: '500',
+            fontSize: 'var(--font-size-sm)',
+            cursor: 'pointer',
+            transition: 'background-color 0.2s ease'
+          }}
+          onMouseOver={(e) => e.target.style.backgroundColor = 'var(--primary-blue-dark)'}
+          onMouseOut={(e) => e.target.style.backgroundColor = 'var(--primary-blue)'}
+          onClick={() => setShowRegister(true)}
+        >
+          Add User
+        </button>
+      </div>
+
+      {/* Stats and Filters */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: 'var(--spacing-4)',
+        marginBottom: 'var(--spacing-6)'
+      }}>
+        <div style={{
+          backgroundColor: 'var(--white)',
+          padding: 'var(--spacing-4)',
+          borderRadius: 'var(--radius)',
+          border: '1px solid var(--border-gray)'
+        }}>
+          <div style={{fontSize: 'var(--font-size-sm)', color: 'var(--text-gray)', marginBottom: 'var(--spacing-1)'}}>
+            Total Users
+          </div>
+          <div style={{fontSize: 'var(--font-size-2xl)', fontWeight: '600', color: 'var(--text-dark)'}}>
+            {users.length}
+          </div>
+        </div>
+
+        <div style={{
+          backgroundColor: 'var(--white)',
+          padding: 'var(--spacing-4)',
+          borderRadius: 'var(--radius)',
+          border: '1px solid var(--border-gray)'
+        }}>
+          <div style={{fontSize: 'var(--font-size-sm)', color: 'var(--text-gray)', marginBottom: 'var(--spacing-1)'}}>
+            Active Users
+          </div>
+          <div style={{fontSize: 'var(--font-size-2xl)', fontWeight: '600', color: 'var(--success-green)'}}>
+            {users.filter(u => u.isActive).length}
+          </div>
+        </div>
+
+        <div style={{
+          backgroundColor: 'var(--white)',
+          padding: 'var(--spacing-4)',
+          borderRadius: 'var(--radius)',
+          border: '1px solid var(--border-gray)'
+        }}>
+          <div style={{fontSize: 'var(--font-size-sm)', color: 'var(--text-gray)', marginBottom: 'var(--spacing-1)'}}>
+            Counsellors
+          </div>
+          <div style={{fontSize: 'var(--font-size-2xl)', fontWeight: '600', color: 'var(--primary-blue)'}}>
+            {users.filter(u => u.role === 'counsellor').length}
+          </div>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div style={{
+        backgroundColor: 'var(--white)',
+        padding: 'var(--spacing-4)',
+        borderRadius: 'var(--radius)',
+        border: '1px solid var(--border-gray)',
+        marginBottom: 'var(--spacing-6)'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 'var(--spacing-4)',
+          flexWrap: 'wrap'
+        }}>
+          <span style={{
+            fontWeight: '500',
+            color: 'var(--text-dark)',
+            fontSize: 'var(--font-size-sm)'
+          }}>Filter:</span>
+          
+          <select 
+            style={{
+              padding: 'var(--spacing-2) var(--spacing-3)',
+              border: '1px solid var(--border-gray)',
+              borderRadius: 'var(--radius)',
+              backgroundColor: 'var(--white)',
+              fontSize: 'var(--font-size-sm)',
+              minWidth: '140px'
+            }}
+            value={filter}
+            onChange={(e) => setFilter(e.target.value)}
+          >
+            <option value="all">All Users</option>
+            <option value="counsellors">Counsellors</option>
+            <option value="admins">Admins</option>
+            {isSuperAdmin && <option value="superadmins">Super Admins</option>}
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+
+          <span style={{
+            color: 'var(--text-light)',
+            fontSize: 'var(--font-size-sm)',
+            marginLeft: 'auto'
+          }}>
+            {filteredUsers.length} users
+          </span>
+        </div>
+      </div>
+
+      {/* Users Table */}
+      <div style={{
+        backgroundColor: 'var(--white)',
+        borderRadius: 'var(--radius)',
+        border: '1px solid var(--border-gray)',
+        overflow: 'hidden'
+      }}>
+        {/* Table Header */}
+        <div style={{
+          padding: 'var(--spacing-4)',
+          borderBottom: '1px solid var(--border-gray)',
+          backgroundColor: 'var(--secondary-gray-light)'
+        }}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr',
+            gap: 'var(--spacing-4)',
+            alignItems: 'center'
+          }}>
+            <div style={{fontWeight: '600', fontSize: 'var(--font-size-sm)', color: 'var(--text-dark)'}}>User</div>
+            <div style={{fontWeight: '600', fontSize: 'var(--font-size-sm)', color: 'var(--text-dark)'}}>Contact</div>
+            <div style={{fontWeight: '600', fontSize: 'var(--font-size-sm)', color: 'var(--text-dark)'}}>Role</div>
+            <div style={{fontWeight: '600', fontSize: 'var(--font-size-sm)', color: 'var(--text-dark)'}}>Status</div>
+            <div style={{fontWeight: '600', fontSize: 'var(--font-size-sm)', color: 'var(--text-dark)'}}>Actions</div>
+          </div>
+        </div>
+
+        {/* Table Body */}
+        <div>
+          {filteredUsers.length === 0 ? (
+            <div style={{
+              padding: 'var(--spacing-12)',
+              textAlign: 'center',
+              color: 'var(--text-light)'
+            }}>
+              <div style={{fontSize: 'var(--font-size-xl)', marginBottom: 'var(--spacing-3)'}}>👥</div>
+              <div style={{fontSize: 'var(--font-size-base)', fontWeight: '500', marginBottom: 'var(--spacing-2)'}}>
+                No users found
+              </div>
+              <div style={{fontSize: 'var(--font-size-sm)'}}>
+                {users.length === 0 ? 'Get started by adding your first user' : 'Try adjusting your filters'}
+              </div>
+            </div>
+          ) : (
+            filteredUsers.map((user) => {
+              const roleConfig = getRoleConfig(user.role);
+              
+              return (
+                <div key={user.id} style={{
+                  padding: 'var(--spacing-4)',
+                  borderBottom: '1px solid var(--border-gray)',
+                  transition: 'background-color 0.2s ease'
+                }}
+                onMouseOver={(e) => e.target.style.backgroundColor = 'var(--secondary-gray-light)'}
+                onMouseOut={(e) => e.target.style.backgroundColor = 'var(--white)'}
+                >
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: '2fr 2fr 1fr 1fr 1fr',
+                    gap: 'var(--spacing-4)',
+                    alignItems: 'center'
+                  }}>
+                    {/* User Info */}
+                    <div>
+                      <div style={{
+                        fontWeight: '500',
+                        color: 'var(--text-dark)',
+                        marginBottom: 'var(--spacing-1)'
+                      }}>
+                        {user.name || 'Unnamed User'}
+                      </div>
+                      {user.role === 'counsellor' && user.maxCases && (
+                        <div style={{
+                          fontSize: 'var(--font-size-xs)',
+                          color: 'var(--text-light)'
+                        }}>
+                          Max cases: {user.maxCases}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Contact */}
+                    <div>
+                      <div style={{
+                        fontSize: 'var(--font-size-sm)',
+                        color: 'var(--text-dark)',
+                        marginBottom: 'var(--spacing-1)'
+                      }}>
+                        {user.email}
+                      </div>
+                      {user.role === 'counsellor' && user.specialization && (
+                        <div style={{
+                          fontSize: 'var(--font-size-xs)',
+                          color: 'var(--text-light)'
+                        }}>
+                          {Array.isArray(user.specialization) ? user.specialization.join(', ') : user.specialization}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Role */}
+                    <div>
+                      <span style={{
+                        display: 'inline-block',
+                        padding: 'var(--spacing-1) var(--spacing-2)',
+                        backgroundColor: roleConfig.bgColor,
+                        color: roleConfig.color,
+                        borderRadius: 'var(--radius-full)',
+                        fontSize: 'var(--font-size-xs)',
+                        fontWeight: '500',
+                        border: `1px solid ${roleConfig.color}20`
+                      }}>
+                        {roleConfig.label}
+                      </span>
+                    </div>
+
+                    {/* Status */}
+                    <div>
+                      <span style={{
+                        display: 'inline-block',
+                        padding: 'var(--spacing-1) var(--spacing-2)',
+                        backgroundColor: user.isActive ? '#f0fff4' : '#f8f9fa',
+                        color: user.isActive ? '#27ae60' : '#95a5a6',
+                        borderRadius: 'var(--radius-full)',
+                        fontSize: 'var(--font-size-xs)',
+                        fontWeight: '500',
+                        border: `1px solid ${user.isActive ? '#27ae60' : '#95a5a6'}20`
+                      }}>
+                        {user.isActive ? 'Active' : 'Inactive'}
+                      </span>
+                    </div>
+
+                    {/* Actions */}
+                    <div style={{display: 'flex', gap: 'var(--spacing-2)'}}>
+                      <button
+                        style={{
+                          padding: 'var(--spacing-1) var(--spacing-2)',
+                          backgroundColor: 'transparent',
+                          color: 'var(--primary-blue)',
+                          border: '1px solid var(--primary-blue)',
+                          borderRadius: 'var(--radius)',
+                          fontSize: 'var(--font-size-xs)',
+                          fontWeight: '500',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease'
+                        }}
+                        onMouseOver={(e) => {
+                          e.target.style.backgroundColor = 'var(--primary-blue)';
+                          e.target.style.color = 'var(--white)';
+                        }}
+                        onMouseOut={(e) => {
+                          e.target.style.backgroundColor = 'transparent';
+                          e.target.style.color = 'var(--primary-blue)';
+                        }}
+                        onClick={() => setEditingUser(user)}
+                        disabled={user.role === 'superadmin' && !isSuperAdmin}
+                      >
+                        Edit
+                      </button>
+                      
+                      <button
+                        style={{
+                          padding: 'var(--spacing-1) var(--spacing-2)',
+                          backgroundColor: 'transparent',
+                          color: 'var(--error-red)',
+                          border: '1px solid var(--error-red)',
+                          borderRadius: 'var(--radius)',
+                          fontSize: 'var(--font-size-xs)',
+                          fontWeight: '500',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease'
+                        }}
+                        onMouseOver={(e) => {
+                          e.target.style.backgroundColor = 'var(--error-red)';
+                          e.target.style.color = 'var(--white)';
+                        }}
+                        onMouseOut={(e) => {
+                          e.target.style.backgroundColor = 'transparent';
+                          e.target.style.color = 'var(--error-red)';
+                        }}
+                        onClick={() => handleDeleteUser(user.id, user.email)}
+                        disabled={loading || user.role === 'superadmin'}
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      {/* Footer Info */}
+      {isSuperAdmin && (
+        <div style={{
+          marginTop: 'var(--spacing-4)',
+          padding: 'var(--spacing-3)',
+          backgroundColor: '#fef5e7',
+          border: '1px solid #f39c12',
+          borderRadius: 'var(--radius)',
+          fontSize: 'var(--font-size-sm)',
+          color: '#d35400',
+          textAlign: 'center'
+        }}>
+          ⚡ You are viewing this page with <strong>Super Admin</strong> privileges
+        </div>
+      )}
     </div>
   );
 };

@@ -78,7 +78,7 @@ const Reports = () => {
     const doc = new jsPDF();
     
     // Add header with TEARS Foundation branding
-    doc.setFillColor(41, 128, 185); // Blue color
+    doc.setFillColor(41, 128, 185);
     doc.rect(0, 0, 210, 30, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(18);
@@ -184,43 +184,129 @@ const Reports = () => {
 
   return (
     <div style={{padding: 'var(--spacing-6)'}}>
-      <div style={{marginBottom: 'var(--spacing-6)'}}>
-        <h1>Reports & Analytics</h1>
-        <p>Generate and export case reports</p>
+      {/* Header */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        marginBottom: 'var(--spacing-8)'
+      }}>
+        <div>
+          <h1 style={{
+            fontSize: 'var(--font-size-2xl)',
+            fontWeight: '600',
+            color: 'var(--text-dark)',
+            marginBottom: 'var(--spacing-2)'
+          }}>
+            Reports & Analytics
+          </h1>
+          <p style={{
+            color: 'var(--text-gray)',
+            fontSize: 'var(--font-size-base)',
+            margin: 0
+          }}>
+            Generate comprehensive case reports and analytics
+          </p>
+        </div>
       </div>
 
       {/* Report Generator */}
-      <div className="card" style={{marginBottom: 'var(--spacing-6)'}}>
-        <div className="card-header">
-          <h3>Generate Report</h3>
+      <div style={{
+        backgroundColor: 'var(--white)',
+        borderRadius: 'var(--radius)',
+        border: '1px solid var(--border-gray)',
+        marginBottom: 'var(--spacing-6)'
+      }}>
+        <div style={{
+          padding: 'var(--spacing-4)',
+          borderBottom: '1px solid var(--border-gray)',
+          backgroundColor: 'var(--secondary-gray-light)'
+        }}>
+          <h2 style={{
+            fontSize: 'var(--font-size-lg)',
+            fontWeight: '600',
+            color: 'var(--text-dark)',
+            margin: 0
+          }}>
+            Generate Report
+          </h2>
         </div>
-        <div className="card-body">
-          <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 'var(--spacing-4)', alignItems: 'end'}}>
-            <div className="form-group">
-              <label className="form-label">Start Date</label>
+        
+        <div style={{padding: 'var(--spacing-6)'}}>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr auto',
+            gap: 'var(--spacing-4)',
+            alignItems: 'end'
+          }}>
+            <div>
+              <label style={{
+                display: 'block',
+                fontSize: 'var(--font-size-sm)',
+                fontWeight: '500',
+                color: 'var(--text-dark)',
+                marginBottom: 'var(--spacing-2)'
+              }}>
+                Start Date
+              </label>
               <input
                 type="date"
-                className="form-input"
+                style={{
+                  width: '100%',
+                  padding: 'var(--spacing-2) var(--spacing-3)',
+                  border: '1px solid var(--border-gray)',
+                  borderRadius: 'var(--radius)',
+                  fontSize: 'var(--font-size-sm)'
+                }}
                 value={dateRange.start}
                 onChange={(e) => setDateRange(prev => ({...prev, start: e.target.value}))}
               />
             </div>
-            <div className="form-group">
-              <label className="form-label">End Date</label>
+            
+            <div>
+              <label style={{
+                display: 'block',
+                fontSize: 'var(--font-size-sm)',
+                fontWeight: '500',
+                color: 'var(--text-dark)',
+                marginBottom: 'var(--spacing-2)'
+              }}>
+                End Date
+              </label>
               <input
                 type="date"
-                className="form-input"
+                style={{
+                  width: '100%',
+                  padding: 'var(--spacing-2) var(--spacing-3)',
+                  border: '1px solid var(--border-gray)',
+                  borderRadius: 'var(--radius)',
+                  fontSize: 'var(--font-size-sm)'
+                }}
                 value={dateRange.end}
                 onChange={(e) => setDateRange(prev => ({...prev, end: e.target.value}))}
               />
             </div>
+            
             <div>
               <button
+                style={{
+                  padding: 'var(--spacing-2) var(--spacing-4)',
+                  backgroundColor: 'var(--primary-blue)',
+                  color: 'var(--white)',
+                  border: 'none',
+                  borderRadius: 'var(--radius)',
+                  fontWeight: '500',
+                  fontSize: 'var(--font-size-sm)',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s ease',
+                  minWidth: '140px'
+                }}
+                onMouseOver={(e) => e.target.style.backgroundColor = 'var(--primary-blue-dark)'}
+                onMouseOut={(e) => e.target.style.backgroundColor = 'var(--primary-blue)'}
                 onClick={generateReport}
-                className="btn btn-primary"
                 disabled={loading}
               >
-                {loading ? 'Loading...' : 'Generate Report'}
+                {loading ? 'Generating...' : 'Generate Report'}
               </button>
             </div>
           </div>
@@ -229,92 +315,264 @@ const Reports = () => {
 
       {/* Generated Reports */}
       {reports.map((report, index) => (
-        <div key={index} className="card" style={{marginBottom: 'var(--spacing-4)'}}>
-          <div className="card-header" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-            <h3>Report: {report.dateRange}</h3>
+        <div key={index} style={{
+          backgroundColor: 'var(--white)',
+          borderRadius: 'var(--radius)',
+          border: '1px solid var(--border-gray)',
+          marginBottom: 'var(--spacing-4)'
+        }}>
+          {/* Report Header */}
+          <div style={{
+            padding: 'var(--spacing-4)',
+            borderBottom: '1px solid var(--border-gray)',
+            backgroundColor: 'var(--secondary-gray-light)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <div>
+              <h3 style={{
+                fontSize: 'var(--font-size-lg)',
+                fontWeight: '600',
+                color: 'var(--text-dark)',
+                margin: 0,
+                marginBottom: 'var(--spacing-1)'
+              }}>
+                Report: {report.dateRange}
+              </h3>
+              <div style={{
+                fontSize: 'var(--font-size-sm)',
+                color: 'var(--text-gray)'
+              }}>
+                Generated on {new Date().toLocaleDateString()}
+              </div>
+            </div>
+            
             <div style={{display: 'flex', gap: 'var(--spacing-2)'}}>
               <button
+                style={{
+                  padding: 'var(--spacing-2) var(--spacing-3)',
+                  backgroundColor: 'var(--primary-blue)',
+                  color: 'var(--white)',
+                  border: 'none',
+                  borderRadius: 'var(--radius)',
+                  fontWeight: '500',
+                  fontSize: 'var(--font-size-sm)',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s ease'
+                }}
+                onMouseOver={(e) => e.target.style.backgroundColor = 'var(--primary-blue-dark)'}
+                onMouseOut={(e) => e.target.style.backgroundColor = 'var(--primary-blue)'}
                 onClick={() => exportToPDF(report)}
-                className="btn btn-primary"
-                style={{display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)'}}
               >
-                📄 Export PDF
+                Export PDF
               </button>
               <button
+                style={{
+                  padding: 'var(--spacing-2) var(--spacing-3)',
+                  backgroundColor: 'transparent',
+                  color: 'var(--primary-blue)',
+                  border: '1px solid var(--primary-blue)',
+                  borderRadius: 'var(--radius)',
+                  fontWeight: '500',
+                  fontSize: 'var(--font-size-sm)',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseOver={(e) => {
+                  e.target.style.backgroundColor = 'var(--primary-blue)';
+                  e.target.style.color = 'var(--white)';
+                }}
+                onMouseOut={(e) => {
+                  e.target.style.backgroundColor = 'transparent';
+                  e.target.style.color = 'var(--primary-blue)';
+                }}
                 onClick={() => exportToCSV(report)}
-                className="btn btn-secondary"
-                style={{display: 'flex', alignItems: 'center', gap: 'var(--spacing-2)'}}
               >
-                📊 Export CSV
+                Export CSV
               </button>
             </div>
           </div>
-          <div className="card-body">
-            <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 'var(--spacing-4)', marginBottom: 'var(--spacing-6)'}}>
-              <div className="text-center">
-                <h4>Total Cases</h4>
-                <p style={{fontSize: 'var(--font-size-3xl)', fontWeight: '700', color: 'var(--primary-blue)'}}>
+
+          {/* Report Content */}
+          <div style={{padding: 'var(--spacing-6)'}}>
+            {/* Summary Statistics */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: 'var(--spacing-4)',
+              marginBottom: 'var(--spacing-6)'
+            }}>
+              <div style={{
+                textAlign: 'center',
+                padding: 'var(--spacing-4)',
+                backgroundColor: 'var(--secondary-gray-light)',
+                borderRadius: 'var(--radius)'
+              }}>
+                <div style={{
+                  fontSize: 'var(--font-size-sm)',
+                  color: 'var(--text-gray)',
+                  marginBottom: 'var(--spacing-2)'
+                }}>
+                  Total Cases
+                </div>
+                <div style={{
+                  fontSize: 'var(--font-size-2xl)',
+                  fontWeight: '600',
+                  color: 'var(--primary-blue)'
+                }}>
                   {report.totalCases}
-                </p>
+                </div>
               </div>
-              <div className="text-center">
-                <h4>New Cases</h4>
-                <p style={{fontSize: 'var(--font-size-3xl)', fontWeight: '700', color: 'var(--success-green)'}}>
+
+              <div style={{
+                textAlign: 'center',
+                padding: 'var(--spacing-4)',
+                backgroundColor: 'var(--secondary-gray-light)',
+                borderRadius: 'var(--radius)'
+              }}>
+                <div style={{
+                  fontSize: 'var(--font-size-sm)',
+                  color: 'var(--text-gray)',
+                  marginBottom: 'var(--spacing-2)'
+                }}>
+                  New Cases
+                </div>
+                <div style={{
+                  fontSize: 'var(--font-size-2xl)',
+                  fontWeight: '600',
+                  color: '#e74c3c'
+                }}>
                   {report.newCases}
-                </p>
+                </div>
               </div>
-              <div className="text-center">
-                <h4>In Progress</h4>
-                <p style={{fontSize: 'var(--font-size-3xl)', fontWeight: '700', color: 'var(--warning-yellow)'}}>
+
+              <div style={{
+                textAlign: 'center',
+                padding: 'var(--spacing-4)',
+                backgroundColor: 'var(--secondary-gray-light)',
+                borderRadius: 'var(--radius)'
+              }}>
+                <div style={{
+                  fontSize: 'var(--font-size-sm)',
+                  color: 'var(--text-gray)',
+                  marginBottom: 'var(--spacing-2)'
+                }}>
+                  In Progress
+                </div>
+                <div style={{
+                  fontSize: 'var(--font-size-2xl)',
+                  fontWeight: '600',
+                  color: '#f39c12'
+                }}>
                   {report.inProgressCases}
-                </p>
+                </div>
               </div>
-              <div className="text-center">
-                <h4>Closed Cases</h4>
-                <p style={{fontSize: 'var(--font-size-3xl)', fontWeight: '700', color: 'var(--success-green)'}}>
+
+              <div style={{
+                textAlign: 'center',
+                padding: 'var(--spacing-4)',
+                backgroundColor: 'var(--secondary-gray-light)',
+                borderRadius: 'var(--radius)'
+              }}>
+                <div style={{
+                  fontSize: 'var(--font-size-sm)',
+                  color: 'var(--text-gray)',
+                  marginBottom: 'var(--spacing-2)'
+                }}>
+                  Closed Cases
+                </div>
+                <div style={{
+                  fontSize: 'var(--font-size-2xl)',
+                  fontWeight: '600',
+                  color: '#27ae60'
+                }}>
                   {report.closedCases}
-                </p>
+                </div>
               </div>
             </div>
 
-            {/* Cases by Topic */}
-            <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--spacing-6)'}}>
+            {/* Breakdown Sections */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: 'var(--spacing-6)'
+            }}>
+              {/* Cases by Topic */}
               <div>
-                <h4>Cases by Topic</h4>
+                <h4 style={{
+                  fontSize: 'var(--font-size-base)',
+                  fontWeight: '600',
+                  color: 'var(--text-dark)',
+                  marginBottom: 'var(--spacing-3)'
+                }}>
+                  Cases by Topic
+                </h4>
                 <div style={{display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)'}}>
                   {Object.entries(report.casesByTopic).map(([topic, count]) => (
                     <div key={topic} style={{
                       display: 'flex',
                       justifyContent: 'space-between',
-                      padding: 'var(--spacing-2)',
-                      backgroundColor: 'var(--secondary-gray-light)',
+                      alignItems: 'center',
+                      padding: 'var(--spacing-3)',
+                      backgroundColor: 'var(--white)',
+                      border: '1px solid var(--border-gray)',
                       borderRadius: 'var(--radius)'
                     }}>
-                      <span style={{textTransform: 'capitalize'}}>
+                      <span style={{
+                        fontSize: 'var(--font-size-sm)',
+                        color: 'var(--text-dark)',
+                        textTransform: 'capitalize'
+                      }}>
                         {topic.replace(/_/g, ' ')}
                       </span>
-                      <strong>{count}</strong>
+                      <span style={{
+                        fontSize: 'var(--font-size-sm)',
+                        fontWeight: '600',
+                        color: 'var(--primary-blue)'
+                      }}>
+                        {count}
+                      </span>
                     </div>
                   ))}
                 </div>
               </div>
 
+              {/* Cases by Counsellor */}
               <div>
-                <h4>Cases by Counsellor</h4>
+                <h4 style={{
+                  fontSize: 'var(--font-size-base)',
+                  fontWeight: '600',
+                  color: 'var(--text-dark)',
+                  marginBottom: 'var(--spacing-3)'
+                }}>
+                  Cases by Counsellor
+                </h4>
                 <div style={{display: 'flex', flexDirection: 'column', gap: 'var(--spacing-2)'}}>
                   {Object.entries(report.casesByCounsellor).map(([counsellor, count]) => (
                     <div key={counsellor} style={{
                       display: 'flex',
                       justifyContent: 'space-between',
-                      padding: 'var(--spacing-2)',
-                      backgroundColor: 'var(--secondary-gray-light)',
+                      alignItems: 'center',
+                      padding: 'var(--spacing-3)',
+                      backgroundColor: 'var(--white)',
+                      border: '1px solid var(--border-gray)',
                       borderRadius: 'var(--radius)'
                     }}>
-                      <span>
+                      <span style={{
+                        fontSize: 'var(--font-size-sm)',
+                        color: 'var(--text-dark)'
+                      }}>
                         {counsellor === 'unassigned' ? 'Unassigned' : 
-                         counsellor.length > 10 ? counsellor.substring(0, 10) + '...' : counsellor}
+                         counsellor.length > 8 ? counsellor.substring(0, 8) + '...' : counsellor}
                       </span>
-                      <strong>{count}</strong>
+                      <span style={{
+                        fontSize: 'var(--font-size-sm)',
+                        fontWeight: '600',
+                        color: 'var(--primary-blue)'
+                      }}>
+                        {count}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -323,6 +581,35 @@ const Reports = () => {
           </div>
         </div>
       ))}
+
+      {/* Empty State */}
+      {reports.length === 0 && (
+        <div style={{
+          backgroundColor: 'var(--white)',
+          borderRadius: 'var(--radius)',
+          border: '1px solid var(--border-gray)',
+          padding: 'var(--spacing-12)',
+          textAlign: 'center'
+        }}>
+          <div style={{fontSize: 'var(--font-size-xl)', marginBottom: 'var(--spacing-4)', color: 'var(--text-light)'}}>
+            📊
+          </div>
+          <h3 style={{
+            fontSize: 'var(--font-size-lg)',
+            fontWeight: '600',
+            color: 'var(--text-dark)',
+            marginBottom: 'var(--spacing-2)'
+          }}>
+            No Reports Generated
+          </h3>
+          <p style={{
+            color: 'var(--text-gray)',
+            margin: 0
+          }}>
+            Select a date range and generate your first report to view analytics
+          </p>
+        </div>
+      )}
     </div>
   );
 };
