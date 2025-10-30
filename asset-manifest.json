@@ -1,20 +1,20 @@
 {
   "files": {
     "main.css": "/tears/static/css/main.32ec1c81.css",
-    "main.js": "/tears/static/js/main.e0c50985.js",
+    "main.js": "/tears/static/js/main.d2fc2960.js",
     "static/js/239.95b8bf0e.chunk.js": "/tears/static/js/239.95b8bf0e.chunk.js",
     "static/js/977.7edcbf4d.chunk.js": "/tears/static/js/977.7edcbf4d.chunk.js",
     "static/js/455.b635f7c9.chunk.js": "/tears/static/js/455.b635f7c9.chunk.js",
     "static/media/logo.webp": "/tears/static/media/logo.ddeef10c6995942511ab.webp",
     "index.html": "/tears/index.html",
     "main.32ec1c81.css.map": "/tears/static/css/main.32ec1c81.css.map",
-    "main.e0c50985.js.map": "/tears/static/js/main.e0c50985.js.map",
+    "main.d2fc2960.js.map": "/tears/static/js/main.d2fc2960.js.map",
     "239.95b8bf0e.chunk.js.map": "/tears/static/js/239.95b8bf0e.chunk.js.map",
     "977.7edcbf4d.chunk.js.map": "/tears/static/js/977.7edcbf4d.chunk.js.map",
     "455.b635f7c9.chunk.js.map": "/tears/static/js/455.b635f7c9.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.32ec1c81.css",
-    "static/js/main.e0c50985.js"
+    "static/js/main.d2fc2960.js"
   ]
 }
