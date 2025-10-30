@@ -160,6 +160,36 @@ const AdminSidebar = ({ children }) => {
                 📈 Reports & Analytics
               </Link>
             </li>
+            <li>
+  <Link 
+    to="/track-case" 
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      padding: 'var(--spacing-3) var(--spacing-4)',
+      color: 'var(--white)',
+      textDecoration: 'none',
+      borderRadius: 'var(--radius-lg)',
+      backgroundColor: isActive('/track-case') ? 'rgba(255,255,255,0.2)' : 'transparent',
+      transition: 'background-color 0.2s',
+      minHeight: '44px', // Mobile touch-friendly
+      fontSize: 'var(--font-size-base)',
+      fontWeight: '500'
+    }}
+    onMouseOver={(e) => {
+      if (!isActive('/track-case')) {
+        e.target.style.backgroundColor = 'rgba(255,255,255,0.1)';
+      }
+    }}
+    onMouseOut={(e) => {
+      if (!isActive('/track-case')) {
+        e.target.style.backgroundColor = 'transparent';
+      }
+    }}
+  >
+    🔍 Track Case
+  </Link>
+</li>
           </ul>
         </nav>
 
