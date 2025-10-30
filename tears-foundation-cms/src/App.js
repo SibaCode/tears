@@ -1,6 +1,6 @@
 // src/App.js
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 
 // Public Components
@@ -52,7 +52,7 @@ function App() {
           <Route path="/get-help" element={<PublicLayout><GetHelp /></PublicLayout>} />
           <Route path="/volunteer" element={<PublicLayout><Volunteer /></PublicLayout>} />
           <Route path="/contact" element={<PublicLayout><Contact /></PublicLayout>} />
-<Route path="/track-case" element={<PublicCaseTracker />} />
+          <Route path="/track-case" element={<PublicCaseTracker />} />
 
           {/* Auth Routes */}
           <Route path="/admin/welcome" element={<Welcome />} />
